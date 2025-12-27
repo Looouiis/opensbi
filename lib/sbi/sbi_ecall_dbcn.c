@@ -20,7 +20,7 @@ static int sbi_ecall_dbcn_handler(unsigned long extid, unsigned long funcid,
 				  struct sbi_trap_regs *regs,
 				  struct sbi_ecall_return *out)
 {
-	sbi_printf("dbcn entered");
+	// sbi_printf("dbcn entered");
 	ulong smode = (csr_read(CSR_MSTATUS) & MSTATUS_MPP) >>
 			MSTATUS_MPP_SHIFT;
 
@@ -50,8 +50,10 @@ static int sbi_ecall_dbcn_handler(unsigned long extid, unsigned long funcid,
 		sbi_hart_map_saddr(regs->a1, regs->a0);
 		if (funcid == SBI_EXT_DBCN_CONSOLE_WRITE)
 			out->value = sbi_nputs((const char *)regs->a1, regs->a0);
-		else
+		else {
 			out->value = sbi_ngets((char *)regs->a1, regs->a0);
+			sbi_printf("test_point\n");
+		}
 		sbi_hart_unmap_saddr();
 		return 0;
 	case SBI_EXT_DBCN_CONSOLE_WRITE_BYTE:
