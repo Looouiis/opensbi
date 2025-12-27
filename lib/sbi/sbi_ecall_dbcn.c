@@ -16,6 +16,8 @@
 #include <sbi/riscv_asm.h>
 #include <sbi/sbi_hart.h>
 
+#include <sbi/sbi_system.h>
+
 static int sbi_ecall_dbcn_handler(unsigned long extid, unsigned long funcid,
 				  struct sbi_trap_regs *regs,
 				  struct sbi_ecall_return *out)
@@ -41,21 +43,22 @@ static int sbi_ecall_dbcn_handler(unsigned long extid, unsigned long funcid,
 		 * RV64.
 		 */
 		if (regs->a2) {
-			sbi_printf("test_point1\n"); while(true);
+			sbi_printf("test_point1\n"); sbi_system_reset(0, 0);
 			return SBI_ERR_FAILED;
 		}
 
 		if (!sbi_domain_check_addr_range(sbi_domain_thishart_ptr(),
 					regs->a1, regs->a0, smode,
-					SBI_DOMAIN_READ|SBI_DOMAIN_WRITE))
-			sbi_printf("test_point2\n"); while(true);
+					SBI_DOMAIN_READ|SBI_DOMAIN_WRITE)) {
+			sbi_printf("test_point2\n"); sbi_system_reset(0, 0);
 			return SBI_ERR_INVALID_PARAM;
+		}
 		sbi_hart_map_saddr(regs->a1, regs->a0);
 		if (funcid == SBI_EXT_DBCN_CONSOLE_WRITE)
 			out->value = sbi_nputs((const char *)regs->a1, regs->a0);
 		else {
 			out->value = sbi_ngets((char *)regs->a1, regs->a0);
-			sbi_printf("test_point3\n"); whilc(true);
+			sbi_printf("test_point3\n"); sbi_system_reset(0, 0);
 		}
 		sbi_hart_unmap_saddr();
 		return 0;
